@@ -11,9 +11,9 @@ class UploadRepository
         return Upload::all();
     }
 
-    public function find($file_id)
+    public function find($post_id)
     {
-        return Upload::findOrFail($file_id);
+        return Upload::findOrFail($post_id);
     }
 
     public function create(array $data)
@@ -21,18 +21,19 @@ class UploadRepository
         return Upload::create($data);
     }
 
-    public function update($file_id, array $data)
+    public function update($post_id, array $data)
     {
-        $Upload = Upload::findOrFail($file_id);
-        $Upload->update($data);
+        $upload = Upload::findOrFail($post_id);
 
-        return $Upload;  // Return the updated Upload
+        $upload->update($data);
+
+        return $upload;  // Return the updated Upload
     }
 
-    public function delete($file_id)
+    public function delete($post_id)
     {
-        $Upload = Upload::findOrFail($file_id);
+        $upload = Upload::findOrFail($post_id);
 
-        return $Upload->delete();
+        return $upload->delete();
     }
 }

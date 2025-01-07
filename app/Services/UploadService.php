@@ -19,9 +19,9 @@ class UploadService
         return $this->uploadRepository->getAll();
     }
 
-    public function getUpload($file_id)
+    public function getUpload($post_id)
     {
-        return $this->uploadRepository->find($file_id);
+        return $this->uploadRepository->find($post_id);
     }
 
     public function createUpload(array $data)
@@ -32,24 +32,14 @@ class UploadService
         return $createdUpload;
     }
 
-    public function updateUpload($file_id, array $data)
+    public function updateUpload($post_id, array $data)
     {
         // Update the Upload using the repository
-        return $this->uploadRepository->update($file_id, $data);
+        return $this->uploadRepository->update($post_id, $data);
     }
 
-    public function deleteUpload($file_id)
+    public function deleteUpload($post_id)
     {
-        return $this->uploadRepository->delete($file_id);
+        return $this->uploadRepository->delete($post_id);
     }
-
-    public function createNewToken($token){
-        return[
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-            'Upload' => auth()->Upload()
-        ];
-    }
-
 }

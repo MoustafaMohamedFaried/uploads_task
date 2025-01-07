@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('uploads', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('user_id');
+            $table->string('title');
+            $table->text('content');
+            $table->string('uploader_id');
+            $table->string('uploader_name');
             $table->timestamps();
         });
     }
