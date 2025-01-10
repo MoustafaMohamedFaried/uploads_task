@@ -31,7 +31,13 @@ class CheckUserToken
             }
 
             $payload = JWTAuth::setToken($token)->getPayload();
-            $request->attributes->set('userProfile', $payload->get('user'));
+            $user = $payload->get('user'); // Retrieve the user data from the token
+
+            // Decode roles_and_permissions into an array
+            $user['roles_and_permissions'] = json_decode($user['roles_and_permissions'], true);
+
+            // Attach the decoded userProfile to the request
+            $request->attributes->set('userProfile', $user);
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'error' => 'Token has expired. Please log in again.',

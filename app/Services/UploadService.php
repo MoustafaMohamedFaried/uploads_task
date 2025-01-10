@@ -24,17 +24,22 @@ class UploadService
     {
         try {
             $userProfile = request()->get('userProfile'); // Accessing the attribute directly
+            $rolesAndPermisions = $userProfile['roles_and_permissions'];
 
-            $validatedData = $request->validate([
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-            ]);
+            if ($rolesAndPermisions['admin'] && $rolesAndPermisions['admin']['create'] == true) {
+                $validatedData = $request->validate([
+                    'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+                ]);
 
-            $validatedData['image'] = $request->file('image')->store('images');
-            $validatedData['user_id'] = $userProfile['id'];
+                $validatedData['image'] = $request->file('image')->store('images');
+                $validatedData['user_id'] = $userProfile['id'];
 
-            $uploadedImage = $this->uploadRepository->upload($validatedData);
+                $uploadedImage = $this->uploadRepository->upload($validatedData);
 
-            return $this->apiResponse($uploadedImage, 'Image uploaded successfully', 200);
+                return $this->apiResponse($uploadedImage, 'Image uploaded successfully', 200);
+            } else {
+                return $this->errorApiResponse([], "You don't have permision to upload image", 403);
+            }
         } catch (ValidationException $e) {
             return $this->errorApiResponse(
                 $e->errors(),
@@ -55,10 +60,14 @@ class UploadService
     {
         try {
             $userProfile = request()->get('userProfile'); // Accessing the attribute directly
+            $rolesAndPermisions = $userProfile['roles_and_permissions'];
+            if ($rolesAndPermisions['admin'] && $rolesAndPermisions['admin']['create'] == true) {
+                $userImages = $this->uploadRepository->getUserImages($userProfile['id']);
 
-            $userUpload = $this->uploadRepository->getUserImages($userProfile['id']);
-
-            return $this->apiResponse($userUpload, "User's photos", 200);
+                return $this->apiResponse($userImages, "User's photos", 200);
+            } else {
+                return $this->errorApiResponse([], "You don't have permision to view images", 403);
+            }
         } catch (Exception $e) {
             return $this->errorApiResponse($e->getMessage(), "Error at get user's photo", $e->getCode());
         }
