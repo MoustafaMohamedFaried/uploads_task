@@ -6,34 +6,22 @@ use App\Models\Upload;
 
 class UploadRepository
 {
-    public function getAll()
+    public function upload($data)
     {
-        return Upload::all();
+        $userImage = Upload::create([
+            'path' => $data['image'],
+            'user_id' => $data['user_id']
+        ]);
+
+        return $userImage;
     }
 
-    public function find($post_id)
+    public function getUserImages($userId)
     {
-        return Upload::findOrFail($post_id);
-    }
+        $userImages = Upload::select(['path'])
+            ->where('user_id', $userId)
+            ->pluck('path')->toArray();
 
-    public function create(array $data)
-    {
-        return Upload::create($data);
-    }
-
-    public function update($post_id, array $data)
-    {
-        $upload = Upload::findOrFail($post_id);
-
-        $upload->update($data);
-
-        return $upload;  // Return the updated Upload
-    }
-
-    public function delete($post_id)
-    {
-        $upload = Upload::findOrFail($post_id);
-
-        return $upload->delete();
+        return $userImages;
     }
 }

@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-Route::apiResource('posts', UploadController::class)->middleware('CheckUserToken');
+Route::middleware(['checkIfHasKey', 'checkUserToken']) // Apply middleware to the entire group
+    ->prefix('uploads') // Add the prefix for the group
+    ->controller(UploadController::class) // Set the controller for the group
+    ->group(function () {
+        Route::post('/upload', 'upload'); // Define the route with the method name only
+        Route::get('/getImages', 'getUserImages'); // Define the route with the method name only
+    });
