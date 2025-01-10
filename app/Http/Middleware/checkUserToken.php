@@ -5,7 +5,10 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Http;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CheckUserToken
 {
@@ -18,23 +21,30 @@ class CheckUserToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Send the request to validate the token
-        $response = Http::withHeaders([
-            'x-api-key' => env('API_KEY'),
-            'Authorization' => $request->header('Authorization'),
-        ])->get('http://127.0.0.1:8000/api/user_profile');
+        try {
+            $token = $request->bearerToken(); // Get token from Authorization header
 
-        // If the response is not successful, block the request
-        if (!$response->successful()) {
+            if (!$token) {
+                return response()->json([
+                    'error' => 'Authorization token not provided.',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $request->attributes->set('userProfile', $payload->get('user'));
+        } catch (TokenExpiredException $e) {
             return response()->json([
-                'status' => false,
-                'message' => $response->json('message') ?? 'Token validation failed',
-                'code' => $response->status(),
-            ], $response->status());
+                'error' => 'Token has expired. Please log in again.',
+            ], Response::HTTP_UNAUTHORIZED);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'error' => 'Invalid token. Please provide a valid token.',
+            ], Response::HTTP_UNAUTHORIZED);
+        } catch (JWTException $e) {
+            return response()->json([
+                'error' => 'Could not parse token. Please provide a valid token.',
+            ], Response::HTTP_UNAUTHORIZED);
         }
-
-        // Attach the user profile to the request for use in the controller
-        $request->attributes->set('userProfile', $response->json());
 
         // Allow the request to proceed
         return $next($request);
