@@ -20,7 +20,7 @@ class UploadRepository
     {
         $userImages = Upload::select(['path'])
             ->where('user_id', $userId)
-            ->pluck('path')->toArray();
+            ->pluck('path');
 
         return $userImages;
     }
